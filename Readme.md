@@ -1,4 +1,6 @@
-#holis cree la rama
+# holis cree la rama
+
+## Estructura basica del proyecto
 
 EcoShop-backend/
     src/
