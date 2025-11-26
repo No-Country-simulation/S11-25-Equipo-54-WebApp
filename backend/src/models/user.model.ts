@@ -6,5 +6,5 @@ export interface Users {
     birth_date: Date;
     email: string;
     password: string;
-    img: string; // URL subida a Cloudinary
+    img: string | null; // URL subida a Cloudinary
 }

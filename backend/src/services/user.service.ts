@@ -1,3 +1,4 @@
+import { RowDataPacket } from "mysql2";
 import { db } from "../config/db";
 import { Users } from "../models/user.model";
 import { hashPassword } from "../utils/bcrypt";
@@ -24,4 +25,13 @@ export const createUser = async (userData: Users) => {
 export const getUsers = async () => {
     const [rows] = await db.query("SELECT * FROM users");
     return rows;
+};
+
+export const getUserByEmail = async (email: string): Promise<Users | null> => {
+  const [rows] = await db.query<RowDataPacket[]>(
+    `SELECT * FROM users WHERE email = ?`,
+    [email]
+  );
+  const user = (rows as RowDataPacket[] & Users[])[0];
+  return user ?? null;
 };
