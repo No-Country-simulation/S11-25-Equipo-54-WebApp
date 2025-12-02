@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { db } from "./config/db";
 import router from "./routes";
+import userRouter from "./routes/user.routes";
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // 👉 Aquí se montan TODAS las rutas del proyecto
 app.use("/api", router);
+app.use("/api", userRouter);
 
 // Ruta simple para probar conexión a MySQL
 app.get("/", async (req, res) => {

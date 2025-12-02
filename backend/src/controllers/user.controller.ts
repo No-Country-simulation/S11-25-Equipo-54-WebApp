@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response) => {
     try {
         const userData: Users = req.body;
 
-        if (!userData.email || !userData.name || userData.last_name || userData.birth_date || userData.password) {
+        if (!userData.email || !userData.name || !userData.last_name || !userData.birth_date || !userData.password) {
             return res.status(400).json({ message: "Debe enviar los campos obligatorios" })
         }
 
