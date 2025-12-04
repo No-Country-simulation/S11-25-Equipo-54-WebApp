@@ -54,3 +54,10 @@ npm run build
 ```bash
 npm run dev
 ```
+
+## 5. Documentacion basica
+- al arrancar el servidor se lanza una doc simple con los endpoints hasta ahora:
+
+## 6. Captura de la documentación
+
+![documentación](https://github.com/No-Country-simulation/S11-25-Equipo-54-WebApp/blob/backend/backend/public/img/capture_1.png)
