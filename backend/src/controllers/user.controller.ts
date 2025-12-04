@@ -4,106 +4,135 @@ import { uploadToCloudinary } from "../config/cloudinary";
 import { Users } from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
-import { JwtPayload, Secret } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 dotenv.config();
 
+const JWT_SECRET = process.env.JWT_SECRET_KEY || "default_secret";
+const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || "1h";
 
-const claveSecreta = process.env.JWT_SECRET_KEY;
+if (!JWT_SECRET) {
+    console.warn("⚠️  JWT_SECRET_KEY no definido en .env");
+}
 
-export const generatedToken = (user: JwtPayload) => {
-    if (!claveSecreta) {
-        return;
-    }
-    return jwt.sign(user, claveSecreta, { expiresIn: "1h" });
+/* ---------------------------------------------------------
+   🔥 FIX FINAL QUE ELIMINA EL ERROR
+   Creamos nuestro propio payload en vez de usar JwtPayload
+--------------------------------------------------------- */
+
+interface UserTokenPayload {
+    id: number | null;
+    email: string;
+    rol: string;
+}
+
+/* ---------------------------------------------------------
+   🔐 GENERAR TOKEN SIN ERRORES
+   (Aquí estaba el problema)
+--------------------------------------------------------- */
+export const generatedToken = (user: UserTokenPayload): string => {
+    const options: SignOptions = {
+        expiresIn: JWT_EXPIRES,
+    };
+
+    return jwt.sign(
+        { ...user }, // payload válido
+        JWT_SECRET, // secret string OK
+        options // options correctas
+    );
 };
 
+/* ---------------------------------------------------------
+   🔑 LOGIN
+--------------------------------------------------------- */
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
-
         const user = await getUserByEmail(email);
 
-        if (!user) {
-            return res.status(404).json({ message: "Usuario no encontrado" })
-        }
+        if (!user)
+            return res.status(404).json({ message: "Usuario no encontrado" });
 
-        const checkPassword = comparePassword(password, user.password);
+        const checkPassword = await comparePassword(password, user.password);
+        if (!checkPassword)
+            return res.status(401).json({ message: "Contraseña incorrecta" });
 
-        if (!checkPassword) {
-            return res.status(401).json({ message: "Contraseña incorrecta" })
-        }
-
-
-        const payload: JwtPayload = {
+        const payload: UserTokenPayload = {
             id: user.id,
             email: user.email,
-            rol: user.rol
+            rol: user.rol,
         };
 
         const token = generatedToken(payload);
 
-        res.status(200).json({ message: "Login exitoso", token })
+        res.status(200).json({ message: "Login exitoso", token });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: (error as Error).message });
     }
-}
+};
 
+/* ---------------------------------------------------------
+   📝 REGISTER
+--------------------------------------------------------- */
 export const registerUser = async (req: Request, res: Response) => {
     try {
         const userData: Users = req.body;
 
-        if (!userData.email || !userData.name || !userData.last_name || !userData.birth_date || !userData.password) {
-            return res.status(400).json({ message: "Debe enviar los campos obligatorios" })
+        if (
+            !userData.email ||
+            !userData.name ||
+            !userData.last_name ||
+            !userData.birth_date ||
+            !userData.password
+        ) {
+            return res
+                .status(400)
+                .json({ message: "Debe enviar los campos obligatorios" });
         }
 
-        // Si viene una imagen, subirla
+        // subir imagen opcional
         if (req.file) {
             const result: any = await uploadToCloudinary(req.file.buffer, "users");
-            userData.img = result.secure_url; // agregar URL final al body
+            userData.img = result.secure_url;
         } else {
             userData.img = null;
         }
 
+        // rol cliente por defecto
+        userData.rol = "cliente";
 
-        const newUser: Users = {
-            id: Math.random() * 100,
-            birth_date: userData.birth_date,
+        // hashear solo una vez
+        userData.password = await hashPassword(userData.password);
+
+        // insertar en DB
+        const dbResult: any = await createUser(userData);
+
+        const newUserId = dbResult?.insertId ?? null;
+
+        const payload: UserTokenPayload = {
+            id: newUserId,
             email: userData.email,
-            img: userData.img,
-            rol: "cliente",
-            name: userData.name,
-            last_name: userData.last_name,
-            password: await hashPassword(userData.password),
-        };
-
-        await createUser(newUser);
-
-        const payload: JwtPayload = {
-            id: newUser.id,
-            email: newUser.email,
-            rol: newUser.rol
+            rol: userData.rol,
         };
 
         const token = generatedToken(payload);
 
         res.status(201).json({
             message: "Usuario creado",
-            newUser,
-            token
+            user: { id: newUserId, ...userData, password: undefined },
+            token,
         });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: (error as Error).message });
     }
 };
 
-
-
-export const listUsers = async (req: Request, res: Response) => {
+/* ---------------------------------------------------------
+   📃 LIST USERS
+--------------------------------------------------------- */
+export const listUsers = async (_req: Request, res: Response) => {
     try {
         const users = await getUsers();
         res.json(users);

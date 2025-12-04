@@ -3,8 +3,12 @@ import cors from "cors";
 import { db } from "./config/db";
 import router from "./routes";
 import userRouter from "./routes/user.routes";
+import path from "path";
 
 const app = express();
+
+// Servir documentación estática
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(cors());
 app.use(express.json());

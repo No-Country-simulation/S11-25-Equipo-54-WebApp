@@ -7,13 +7,16 @@ import {
     updateProductController,
     deleteProductController
 } from "../controllers/product.controller";
+import { authMiddleware } from "../middleware/Auth.middleware";
+import { isAdmin } from "../middleware/isAdmin";
 
 const router = Router();
-
-router.post("/", upload.single("img"), createProductController);
-router.put("/:id", upload.single("img"), updateProductController);
+//rutas protegidas solo para admin
+router.post("/", authMiddleware, isAdmin, upload.single("img"), createProductController);
+router.put("/:id", authMiddleware, isAdmin, upload.single("img"), updateProductController);
+router.delete("/:id", authMiddleware, isAdmin, deleteProductController);
+//clientes
 router.get("/", getProductsController);
 router.get("/:id", getProductByIdController);
-router.delete("/:id", deleteProductController);
 
 export default router;

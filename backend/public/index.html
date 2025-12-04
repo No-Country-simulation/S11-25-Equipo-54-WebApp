@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>API Backend – Documentación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+
+        pre {
+            background: #222;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">🚀 API Backend – Documentación Rápida</h1>
+
+        <!-- USUARIOS -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>👤 Usuarios</h3>
+                <p>Endpoints para registrar y loguear usuarios.</p>
+
+                <h5>📌 Registrar usuario</h5>
+                <p><strong>POST</strong> /api/users/register</p>
+                <pre>
+{
+  "name": "Juan",
+  "last_name": "Pérez",
+  "birth_date": "1990-01-01",
+  "email": "juan@test.com",
+  "password": "123456"
+}</pre>
+
+                <h5>📌 Login</h5>
+                <p><strong>POST</strong> /api/users/login</p>
+                <pre>
+{
+  "email": "juan@test.com",
+  "password": "123456"
+}</pre>
+            </div>
+        </div>
+
+        <!-- PRODUCTOS -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>🛒 Productos</h3>
+                <p>Endpoints para listar, crear y administrar productos.</p>
+
+                <p><strong>GET</strong> /api/products</p>
+                <p><strong>GET</strong> /api/products/:id</p>
+                <p><strong>POST</strong> /api/products (Admin)</p>
+                <p><strong>PUT</strong> /api/products/:id (Admin)</p>
+                <p><strong>DELETE</strong> /api/products/:id (Admin)</p>
+
+                <h5>📌 Ejemplo Crear Producto (form-data)</h5>
+                <pre>
+name: "Producto 1"
+description: "Descripción"
+price: 200
+img: (archivo)
+      </pre>
+            </div>
+        </div>
+
+        <!-- CARRITO -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>🛍 Carrito</h3>
+                <p>Rutas para manejar el carrito del usuario.</p>
+
+                <p><strong>POST</strong> /api/cart/add</p>
+                <pre>
+{
+  "user_id": 1,
+  "product_id": 3,
+  "quantity": 2
+}</pre>
+
+                <p><strong>GET</strong> /api/cart/:user_id</p>
+                <p>Devuelve el carrito del usuario.</p>
+            </div>
+        </div>
+
+        <!-- CHECKOUT -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>💳 Checkout</h3>
+                <p>Genera la orden del usuario.</p>
+
+                <p><strong>POST</strong> /api/cart/checkout</p>
+                <pre>
+{
+  "user_id": 1
+}</pre>
+            </div>
+        </div>
+
+        <!-- NEWS -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>📰 Noticias (Admin)</h3>
+                <p>CRUD básico para noticias.</p>
+
+                <p><strong>GET</strong> /api/news</p>
+                <p><strong>GET</strong> /api/news/:id</p>
+
+                <p><strong>POST</strong> /api/news (Admin)</p>
+                <p><strong>PUT</strong> /api/news/:id (Admin)</p>
+                <p><strong>DELETE</strong> /api/news/:id (Admin)</p>
+
+                <h5>📌 Ejemplo Crear Noticia</h5>
+                <pre>
+title: "Nueva Noticia"
+content: "Contenido aquí"
+img: (archivo)
+      </pre>
+            </div>
+        </div>
+
+        <footer class="text-center mt-5 mb-3">
+            <small>Desarrollado por Ninja 🤘</small>
+        </footer>
+    </div>
+</body>
+
+</html>
