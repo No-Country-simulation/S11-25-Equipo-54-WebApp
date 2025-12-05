@@ -1,5 +1,5 @@
 import { db } from "../config/db";
-import { OkPacket } from "mysql2";
+import { ResultSetHeader } from "mysql2";  // <--- reemplaza OkPacket
 
 export const createOrder = async (user_id: number, cartItems: any[]) => {
     let total = 0;
@@ -9,7 +9,7 @@ export const createOrder = async (user_id: number, cartItems: any[]) => {
     });
 
     // INSERT en orders
-    const [orderRes] = await db.execute<OkPacket>(
+    const [orderRes] = await db.execute<ResultSetHeader>(
         "INSERT INTO orders (user_id, total) VALUES (?, ?)",
         [user_id, total]
     );
@@ -18,9 +18,9 @@ export const createOrder = async (user_id: number, cartItems: any[]) => {
 
     // INSERT en order_items
     for (const item of cartItems) {
-        await db.execute(
+        await db.execute<ResultSetHeader>(
             `INSERT INTO order_items (order_id, product_id, quantity, price)
-            VALUES (?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?)`,
             [order_id, item.product_id, item.quantity, item.precio]
         );
     }

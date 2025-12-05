@@ -4,7 +4,7 @@ import { uploadToCloudinary } from "../config/cloudinary";
 import { Users } from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import dotenv from "dotenv";
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -15,10 +15,6 @@ if (!JWT_SECRET) {
     console.warn("⚠️  JWT_SECRET_KEY no definido en .env");
 }
 
-/* ---------------------------------------------------------
-   🔥 FIX FINAL QUE ELIMINA EL ERROR
-   Creamos nuestro propio payload en vez de usar JwtPayload
---------------------------------------------------------- */
 
 interface UserTokenPayload {
     id: number | null;
@@ -27,23 +23,24 @@ interface UserTokenPayload {
 }
 
 /* ---------------------------------------------------------
-   🔐 GENERAR TOKEN SIN ERRORES
-   (Aquí estaba el problema)
+GENERAR TOKEN SIN ERRORES
 --------------------------------------------------------- */
 export const generatedToken = (user: UserTokenPayload): string => {
-    const options: SignOptions = {
+    const options: jwt.SignOptions = {
         expiresIn: JWT_EXPIRES,
     };
 
     return jwt.sign(
-        { ...user }, // payload válido
-        JWT_SECRET, // secret string OK
-        options // options correctas
+        { ...user },
+        JWT_SECRET,
+        options
     );
 };
 
+
+
 /* ---------------------------------------------------------
-   🔑 LOGIN
+LOGIN
 --------------------------------------------------------- */
 export const login = async (req: Request, res: Response) => {
     try {
@@ -58,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ message: "Contraseña incorrecta" });
 
         const payload: UserTokenPayload = {
-            id: user.id,
+            id: (user.id ?? null) as number | null,
             email: user.email,
             rol: user.rol,
         };
@@ -73,7 +70,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 /* ---------------------------------------------------------
-   📝 REGISTER
+REGISTER
 --------------------------------------------------------- */
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -111,7 +108,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const newUserId = dbResult?.insertId ?? null;
 
         const payload: UserTokenPayload = {
-            id: newUserId,
+            id: newUserId as number | null,
             email: userData.email,
             rol: userData.rol,
         };
@@ -130,7 +127,57 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 
 /* ---------------------------------------------------------
-   📃 LIST USERS
+Crear ADMIN (solo admin puede hacerlo)
+--------------------------------------------------------- */
+export const createAdminUser = async (req: Request, res: Response) => {
+    try {
+        const adminData: Users = req.body;
+
+        if (!adminData.email || !adminData.name || !adminData.last_name || !adminData.birth_date || !adminData.password) {
+            return res.status(400).json({ message: "Debe enviar los campos obligatorios" });
+        }
+
+        // Imagen opcional
+        if (req.file) {
+            const result: any = await uploadToCloudinary(req.file.buffer, "users");
+            adminData.img = result.secure_url;
+        } else {
+            adminData.img = null;
+        }
+
+        // 🔥 Forzar rol admin
+        adminData.rol = "admin";
+
+        // Hash de contraseña
+        adminData.password = await hashPassword(adminData.password);
+
+        const dbResult: any = await createUser(adminData);
+        const newAdminId = dbResult.insertId;
+
+        const payload: UserTokenPayload = {
+            id: newAdminId as number | null,
+            email: adminData.email,
+            rol: "admin",
+        };
+
+        const token = generatedToken(payload);
+
+        res.status(201).json({
+            message: "Administrador creado correctamente",
+            admin: { id: newAdminId, ...adminData, password: undefined },
+            token
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: (error as Error).message });
+    }
+};
+
+
+
+/* ---------------------------------------------------------
+LIST USERS
 --------------------------------------------------------- */
 export const listUsers = async (_req: Request, res: Response) => {
     try {

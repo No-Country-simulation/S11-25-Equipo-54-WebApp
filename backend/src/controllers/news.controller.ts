@@ -9,45 +9,76 @@ import {
 
 export const createNewsController = async (req: Request, res: Response) => {
     try {
-        const news = await createNews(req.body);
-        res.json(news);
+        const user_id = (req as any).user?.id; // viene del token decodificado
+
+        if (!user_id) {
+            return res.status(401).json({ message: "Usuario no autenticado" });
+        }
+
+        const { title, content, image_url, status } = req.body;
+
+        const news = await createNews({
+            user_id,
+            title,
+            content,
+            image_url: image_url || null,
+            status: status || "active"
+        });
+
+        return res.status(201).json(news);
     } catch (err) {
-        res.status(500).json({ error: err });
+        console.error("🔥 ERROR createNews:", err);
+        return res.status(500).json({
+            message: (err as Error).message || "Error al crear noticia"
+        });
     }
 };
+
 
 export const getAllNewsController = async (req: Request, res: Response) => {
     try {
         const news = await getAllNews();
-        res.json(news);
+        return res.json(news);
     } catch (err) {
-        res.status(500).json({ error: err });
+        console.error("🔥 ERROR getAllNews:", err);
+        return res.status(500).json({
+            message: (err as Error).message || "Error al obtener noticias"
+        });
     }
 };
 
 export const getNewsByIdController = async (req: Request, res: Response) => {
     try {
         const news = await getNewsById(Number(req.params.id));
-        res.json(news);
+        return res.json(news);
     } catch (err) {
-        res.status(500).json({ error: err });
+        console.error("🔥 ERROR getNewsById:", err);
+        return res.status(500).json({
+            message: (err as Error).message || "Error al obtener noticia"
+        });
     }
 };
 
 export const updateNewsController = async (req: Request, res: Response) => {
     try {
         await updateNews(Number(req.params.id), req.body);
-        res.json({ message: "Noticia actualizada" });
+        return res.json({ message: "Noticia actualizada" });
     } catch (err) {
-        res.status(500).json({ error: err });
+        console.error("🔥 ERROR updateNews:", err);
+        return res.status(500).json({
+            message: (err as Error).message || "Error al actualizar noticia"
+        });
     }
 };
 
 export const deleteNewsController = async (req: Request, res: Response) => {
     try {
         await deleteNews(Number(req.params.id));
-        res.json({ message: "Noticia eliminada" });
+        return res.json({ message: "Noticia eliminada" });
     } catch (err) {
-        res.status(500).json({ error: err });
+        console.error("🔥 ERROR deleteNews:", err);
+        return res.status(500).json({
+            message: (err as Error).message || "Error al eliminar noticia"
+        });
     }
 };

@@ -27,6 +27,45 @@
     <div class="container mt-5">
         <h1 class="text-center mb-4">🚀 API Backend – Documentación Rápida</h1>
 
+        <!-- ADMIN AUTOMÁTICO -->
+        <div class="card mb-4 border-success">
+            <div class="card-body">
+                <h3>👑 Admin Automático al Iniciar</h3>
+                <p>
+                    Cada vez que se inicia el servidor, se verifica si existe un administrador.
+                    Si no existe, se crea automáticamente:
+                </p>
+
+                <pre>
+📌 Email: admin@ecoshop.com
+📌 Password: Admin123!
+                </pre>
+
+                <p>Este usuario puede crear otros administradores y gestionar el sistema.</p>
+            </div>
+        </div>
+
+        <!-- CREAR ADMIN -->
+        <div class="card mb-4 border-success">
+            <div class="card-body">
+                <h3>🛡 Crear Nuevo Administrador (Solo Admin)</h3>
+                <p>Permite a un administrador crear otros administradores.</p>
+
+                <p><strong>POST</strong> /api/users/create-admin</p>
+                <p><strong>Autorización requerida:</strong> Bearer Token (Admin)</p>
+
+                <h5>📌 Ejemplo cuerpo (form-data)</h5>
+                <pre>
+name: "Julia"
+last_name: "Ramírez"
+birth_date: "1995-05-10"
+email: "julia.admin@test.com"
+password: "Admin567!"
+avatar: (opcional)
+                </pre>
+            </div>
+        </div>
+
         <!-- USUARIOS -->
         <div class="card mb-4">
             <div class="card-body">
@@ -68,11 +107,12 @@
 
                 <h5>📌 Ejemplo Crear Producto (form-data)</h5>
                 <pre>
-name: "Producto 1"
-description: "Descripción"
-price: 200
+marca: "EcoMarca"
+titulo: "Producto 1"
+descripcion: "Descripción"
+precio: 200
 img: (archivo)
-      </pre>
+                </pre>
             </div>
         </div>
 
@@ -127,7 +167,7 @@ img: (archivo)
 title: "Nueva Noticia"
 content: "Contenido aquí"
 img: (archivo)
-      </pre>
+                </pre>
             </div>
         </div>
 
