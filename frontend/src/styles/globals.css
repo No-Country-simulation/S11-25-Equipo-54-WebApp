@@ -9,6 +9,8 @@
   --color-primary-green: #016630;
   --color-header-blue: #b9c8cf;
   --color-primary-white: #d9d9d9;
+  --color-navbar-card: #ddebfa;
+  --color-button-green: #80cb26;
 }
 
 @theme inline {
