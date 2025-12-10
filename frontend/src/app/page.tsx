@@ -1,12 +1,14 @@
+"use client";
+
 import Header from "./components/header/Header";
 import "../../src/styles/globals.css";
-import Category from "./components/category/Category";
+import Register from "./components/register/Register";
 
 export default function Home() {
   return (
     <div>
       <Header />
-      <Category />
+      <Register />
     </div>
   );
 }
